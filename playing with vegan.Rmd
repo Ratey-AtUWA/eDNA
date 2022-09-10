@@ -1,0 +1,210 @@
+---
+title: "eDNA Data Analysis"
+documentclass: article
+classoption: a4paper
+output: word_document
+fig_height: 50%
+fig_width: 50%
+geometry: margin=0.6in
+---
+
+# eDNA Data Analysis Workshop 2022
+
+## Learning Outcomes:
+
+1. Students are able to appropriately analyse data from an eDNA field sampling campaign;
+2. Students are able to interpret and understand statistical outputs from the R package 'vegan'.
+
+```{r set up, results='hide'}
+library(vegan)
+library(flextable)
+eDNA2022 <- read.csv(file = "eDNA2022.csv")
+eDNA2022$Site <- as.factor(eDNA2022$Site)
+```
+
+## List of all the species and their common names
+
+```{r}
+altnames <- 
+  c("MosqFish", "Goby", "Mullet", "Bream", "BnjoFrog", "GToadlet", "MlrdDuck",
+    "SpotDove", "SwampHen", "Crake", "WFHeron", "Lorikeet", "Cattle", "Sheep",
+    "Mouse", "Rat", "HydroidB", "HydroidO", "BwnJelly", "MoonJely", "Dog")
+names_table <- 
+  data.frame(Taxonomic = gsub("."," ",colnames(eDNA2022[,4:24]), fixed = T),
+             Common=c("Mosquito Fish","Bridled Goby","Gray Mullet","Black Bream",
+                      "Western Banjo Frog", "Gunther's Toadlet", "Mallard Duck",
+                      "Spotted Turtle Dove", "Purple Swamphen", "Spotted Crake",
+                      "White Faced Heron", "Rainbow Lorikeet", "Cattle", "Sheep",
+                      "Mouse", "Rat", "HydroidB", "HydroidO", "Brown Jellyfish",
+                      "Moon Jellyfish", "Domestic Dog"),
+             Abbrviated=altnames)
+flextable(names_table,cwidth = c(3,2,2))
+```
+
+```{r generate all species data, results='hide'}
+allSpecies <- eDNA2022[,4:24]
+colnames(allSpecies) <- altnames
+```
+
+## Detrended correspondence analysis - all species
+
+```{r}
+AF_dca_all <- decorana(allSpecies)
+AF_dca_all
+```
+```{r decorana plot, fig.height=5, fig.width=5}
+plot(AF_dca_all)
+```
+
+# Ordinations
+
+Next we will construct our ordination – a mechanism to visualise the similarity
+matrix. There are two different types of ordination that we will use –
+**Multi-Dimensional-Scaling** (nmMDS) and **Principal Coordinates Analysis**
+(PCO). If you have previously used PCA – Principal Component Analysis - you may
+be familiar with ordination methods. PCA is useful for environmental datasets –
+these are represented by a similarity matrix derived via use of Euclidean
+Distance as a measure of similarity. PCA is more suited to environmental
+variables because of the type of data – there are no large blocks of zeros
+(usually) and it is no longer necessary to select a similarity measure that
+ignores joint absences. When looking at ordination plots in general you should
+note that sample points that are spatially located together share common
+characteristics and sample points that are distantly located from one another
+share less characteristics. This holds whether we are working with environmental
+variables (pH, EC, moisture content, heavy metals *etc*.) or species abundances.
+
+The main difference between MDS and PCO relates to the underlying use of the
+resemblance matrix.
+
+**MDS** takes the similarity measures calculated by Jaccard or Bray Curtis and
+ranks them in order. Thus pairs are samples are ranked according to highest to
+lowest similarity and are thus plotted in multidimensional space.
+
+**PCO** takes the value of underlying measure of similarity and plots pairs of
+samples in multi-dimensional space starting with the pairs of samples with
+highest level of similarity and working through the pairs of samples.
+
+For both types of ordinations the software attempts to preserve the similarity
+of each pair of samples –- while this is feasible in multidimensional space, in
+order for us to view the ordination we see this in 2 or 3 dimensions -– thus the
+software attempts to preserve as much as is feasible of the sample pair
+similarity as calculated –- but in reality we need to consider how much the 2-
+dimensional view is a true representation of the data set. In nmMDS we use the
+*stress* value to evaluate this, in PCO we can plot multiple axes, *i.e*. axis 1
+*vs*. axis 2, axis 2 *vs*. axis 3 and so on. In reality much of the variability
+is often explained in the first two axes (*i.e*. 2 dimensions) and we will limit
+our analysis to these axes for this dataset.
+
+## Non-metric multidimensional scaling (nmMDS)
+
+```{r run nmds all jaccard, results='hide'}
+AF_nmds_all <- metaMDS(allSpecies, distance = "jaccard")
+```
+
+```{r show mds all jaccard}
+AF_nmds_all
+```
+
+## nmds again with Bray
+```{r run nmds Bray allspecies, results='hide'}
+AF_nmds_all_B <- metaMDS(allSpecies) # uses Bray by default
+```
+
+```{r show nmds Bray allspecies, results='hold'}
+AF_nmds_all_B
+```
+
+This plot mimics the nmmds plot in Deirdre's handout (note that the sign of dimension MDS2 is reversed)
+
+```{r plot nmds all Bray, fig.height=6, fig.width=6}
+plot(AF_nmds_all$points, pch=c(rep(21:25, 2),21)[eDNA2022$Site], 
+     xlim = c(-1.6,2.2), ylim = c(1.2,-1.2), 
+     bg=seq(1,11)[eDNA2022$Site], 
+     cex = 1.4, main = "All species", col.main = "steelblue")
+text(jitter(AF_nmds_all$points[,1], factor = 500),
+     jitter(AF_nmds_all$points[,2], factor=50), labels=eDNA2022$SiteID, cex=1, 
+     col=c("black","grey40","grey70",
+           rainbow(4,v=0.75,end=0.25),
+           rainbow(4,v=0.75,start=0.45,end=0.8))[eDNA2022$Site])
+text(AF_nmds_all, display = "species", col = "#80008080", font=3, cex = 1.1)
+```
+
+## Analysis with just the aquatic species
+
+These are: *Gambusia holbrooki, Arenigobius bifrenatus, Mugil cephalus, Acanthopagrus butcheri, Limnodynastes dorsalis, Pseudophryne guentheri, Blackfordia polytentaculata, Obelia bidentata, Phyllorhiza punctata, Aurelia sp.*
+
+```{r subset to just aquatic, paged.print=FALSE, results='hold'}
+fish <- allSpecies[,c(1:6,17:20)]
+head(fish)
+```
+
+### for interest look at the dissimilarity matrix
+
+```{r dissim matrix aquat bray}
+AF_diss_aquat <- vegdist(fish, 
+                           distance = "bray")
+options(max.print=2000)
+print(AF_diss_aquat, digits = 2)
+```
+
+```{r run nmds aquat Bray, results='hide'}
+AF_nmds_aquat <- metaMDS(fish, trymax = 500, 
+                           distance = "bray")
+```
+```{r show nmds aquat Bray}
+AF_nmds_aquat
+```
+```{r plot nmds aquat Bray, fig.height=5, fig.width=5}
+plot(AF_nmds_aquat, type="p",display = "sites", cex = 1.2)
+text(AF_nmds_aquat, display = "species", col = "dodgerblue", cex = 0.8)
+```
+
+### alternative to vegan plots
+```{r alt1 to vegan nmds plots, fig.height=5, fig.width=5}
+palette(c("black","grey80","grey92",
+          rainbow(4,s=0.5,end=0.25),rainbow(4,s=0.5,start=0.45,end=0.8)))
+plot(AF_nmds_aquat$points, pch=c(rep(21:25, 2),21)[eDNA2022$Site], 
+     xlim = c(-1.2,1.8), 
+     bg = seq(1,11)[eDNA2022$Site], 
+     cex = 1.4, col.main = "steelblue", main = "Just aquatic species")
+text(jitter(AF_nmds_aquat$points[,1], factor = 500),
+     jitter(AF_nmds_aquat$points[,2], factor=50), 
+     labels=eDNA2022$SiteID, cex=1, 
+     col=c("black","grey40","grey70",
+           rainbow(4,v=0.75,end=0.25),
+           rainbow(4,v=0.75,start=0.45,end=0.8))[eDNA2022$Site])
+text(AF_nmds_aquat, display = "species", col = "grey33", font=3, cex = 0.9)
+```
+
+## Principal Coordinates Analysis
+
+In the 'vegan' package we use Weighted classical multidimensional scaling, also
+known as *Weighted Principal Coordinates Analysis*.
+
+```{r}
+AF_pco_all <- wcmdscale(vegdist(allSpecies), eig=TRUE)
+```
+```{r basic pco plot, fig.height=5, fig.width=5, fig.cap="Basic PCO plot based on all species."}
+plot(AF_pco_all)
+```
+
+```{r better pco plot using base R, fig.width=6, fig.height=6}
+palette(c("black","grey60","grey42",
+          rainbow(4,v=0.75,end=0.25),rainbow(4,v=0.75,start=0.45,end=0.8)))
+plot(AF_pco_all$points[,1:2], xlim = c(0.4,-0.6), ylim = c(0.4,-0.6), 
+     pch=3, cex = 0.5, col = "grey")
+text(AF_pco_all$points[,1:2],labels = eDNA2022$SiteID,
+     col=seq(1,11)[eDNA2022$Site])
+```
+
+```{r calculate pco scores but not sure if we need this}
+AF_pco_scores <- scores(AF_pco_all)
+```
+
+In the 'vegan' package, the adonis2() function implements Permutational Multivariate Analysis of Variance Using Distance Matrices
+
+```{r}
+adonis2(eDNA2022[,4:24] ~ eDNA2022$Site, data = eDNA2022)
+```
+
+adonis2(Site ~ , data = eDNA2022)
