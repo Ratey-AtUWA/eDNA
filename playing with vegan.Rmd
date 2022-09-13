@@ -130,12 +130,19 @@ output shows the first few rows and columns of the dissimilarity matrix; each
 number represents the Jaccard distance between samples based on the presence or
 absence of species.
 
-```{r dissim matrix all Jaccard, results='hold'}
+```{r dissim matrix all Jaccard, eval=FALSE}
 AF_diss_all <- vegdist(allSpecies, 
                            distance = "jaccard") # default is distance = "bray"
 
 # just look at the top corner of the dissimilarity matrix:
 txt0 <- capture.output(print(AF_diss_all, digits=3)); txt0[1:10]; rm(txt0)
+```
+
+```{r dist matrix aquat bray output with cat, echo=FALSE}
+AF_diss_all <- vegdist(allSpecies, 
+                           distance = "jaccard")
+txt0 <- capture.output(print(AF_diss_aquat,digits=3))
+for (i in 1:11){ cat(txt0[i],"\n") }
 ```
 
 # Ordinations
@@ -400,10 +407,17 @@ head(fish)
 
 ### for interest look at the dissimilarity matrix
 
-```{r dissim matrix aquat bray}
+```{r dissim matrix aquat bray, eval=FALSE}
 AF_diss_aquat <- vegdist(fish, 
                            distance = "bray")
 txt0 <- capture.output(print(AF_diss_aquat,digits=3));txt0[1:10];rm(txt0)
+```
+
+```{r dist matrix aquat bray output with cat, echo=FALSE}
+AF_diss_aquat <- vegdist(fish, 
+                           distance = "bray")
+txt0 <- capture.output(print(AF_diss_aquat,digits=3))
+for (i in 1:11){ cat(txt0[i],"\n") }
 ```
 
 ```{r run nmds aquat Bray, results='hide'}
