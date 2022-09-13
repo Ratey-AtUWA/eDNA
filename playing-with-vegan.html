@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>eDNA Data Analysis</title>
+
+<script src="playing-with-vegan_files/header-attrs-2.14/header-attrs.js"></script>
+<script src="playing-with-vegan_files/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="playing-with-vegan_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="playing-with-vegan_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="playing-with-vegan_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="playing-with-vegan_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="playing-with-vegan_files/navigation-1.1/tabsets.js"></script>
+<link href="playing-with-vegan_files/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="playing-with-vegan_files/highlightjs-9.12.0/highlight.js"></script>
+<link href="playing-with-vegan_files/tabwid-1.0.0/tabwid.css" rel="stylesheet" />
+<link href="playing-with-vegan_files/tabwid-1.0.0/scrool.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">eDNA Data Analysis</h1>
+
+</div>
+
+
+<div id="edna-data-analysis-workshop-2022" class="section level1">
+<h1>eDNA Data Analysis Workshop 2022</h1>
+<div id="learning-outcomes" class="section level2">
+<h2>Learning Outcomes:</h2>
+<ol style="list-style-type: decimal">
+<li>Students are able to appropriately analyse data from an eDNA field
+sampling campaign;</li>
+<li>Students are able to interpret and understand statistical outputs
+from the R package <span
+style="font-family: monospace; background-color: #e8e8e8;">vegan</span>.</li>
+</ol>
+<pre class="r"><code>library(vegan)
+library(flextable)
+library(stringr)
+library(magrittr) # for pipe syntax
+set_flextable_defaults(theme_fun = &quot;theme_zebra&quot;, font.size = 9)</code></pre>
+</div>
+<div id="import-the-data" class="section level2">
+<h2>Import the data</h2>
+<p><strong>Notes</strong>:</p>
+<ol style="list-style-type: decimal">
+<li>This code imports the data from a file where the <strong>samples are
+rows</strong> and the <strong>species are columns</strong>.</li>
+<li>We convert the column <span
+style="font-family: monospace; background-color: #e8e8e8;">Site</span>
+to a <em>factor</em> (categorical information in R)</li>
+</ol>
+<pre class="r"><code>eDNA2022 &lt;- read.csv(file = &quot;eDNA2022.csv&quot;)
+eDNA2022$Site &lt;- as.factor(eDNA2022$Site)</code></pre>
+<p>If you have <em>species</em> as rows and <em>samples</em> as columns,
+we will need to do a bit of wrangling!</p>
+<pre class="r"><code>speciesAsRows &lt;- read.csv(file = &quot;speciesAsRows.csv&quot;, row.names = 1)
+speciesAsRows &lt;- rbind(str_remove(colnames(speciesAsRows), &quot;X&quot;),
+                       speciesAsRows)
+row.names(speciesAsRows)[1] &lt;- &quot;SiteID&quot;
+speciesAsRows &lt;- as.matrix(speciesAsRows) # convert to matrix for next step
+speciesAsRows &lt;- t(speciesAsRows) # t() means transpose
+eDNA2022 &lt;- as.data.frame(speciesAsRows)
+eDNA2022$Site &lt;- as.factor(eDNA2022$Site)</code></pre>
+</div>
+<div id="list-of-all-the-species-and-their-common-names"
+class="section level2">
+<h2>List of all the species and their common names</h2>
+<pre class="r"><code>altnames &lt;- 
+  c(&quot;MosqFish&quot;, &quot;Goby&quot;, &quot;Mullet&quot;, &quot;Bream&quot;, &quot;BnjoFrog&quot;, &quot;GToadlet&quot;, &quot;MlrdDuck&quot;,
+    &quot;SpotDove&quot;, &quot;SwampHen&quot;, &quot;Crake&quot;, &quot;WFHeron&quot;, &quot;Lorikeet&quot;, &quot;Cattle&quot;, &quot;Sheep&quot;,
+    &quot;Mouse&quot;, &quot;Rat&quot;, &quot;HydroidB&quot;, &quot;HydroidO&quot;, &quot;BwnJelly&quot;, &quot;MoonJely&quot;, &quot;Dog&quot;)
+names_table &lt;- 
+  data.frame(Taxonomic = gsub(&quot;.&quot;,&quot; &quot;,colnames(eDNA2022[,4:24]), fixed = T),
+             Common=c(&quot;Mosquito Fish&quot;,&quot;Bridled Goby&quot;,&quot;Gray Mullet&quot;,&quot;Black Bream&quot;,
+                      &quot;Western Banjo Frog&quot;, &quot;Gunther&#39;s Toadlet&quot;, &quot;Mallard Duck&quot;,
+                      &quot;Spotted Turtle Dove&quot;, &quot;Purple Swamphen&quot;, &quot;Spotted Crake&quot;,
+                      &quot;White Faced Heron&quot;, &quot;Rainbow Lorikeet&quot;, &quot;Cattle&quot;, &quot;Sheep&quot;,
+                      &quot;Mouse&quot;, &quot;Rat&quot;, &quot;HydroidB&quot;, &quot;HydroidO&quot;, &quot;Brown Jellyfish&quot;,
+                      &quot;Moon Jellyfish&quot;, &quot;Domestic Dog&quot;),
+             Abbreviated=altnames)
+flextable(names_table,cwidth = c(3,2,2))</code></pre>
+<template id="bd0666b5-302d-43cf-a0e6-e7ace23b3f40"><style>
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-0054a654{}.cl-004ca95e{font-family:'Arial';font-size:9pt;font-weight:bold;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-004ca968{font-family:'Arial';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-004cbcbe{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-004cf0a8{width:216pt;background-color:rgba(239, 239, 239, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-004cf0b2{width:144pt;background-color:rgba(239, 239, 239, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-004cf0b3{width:144pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-004cf0b4{width:216pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-004cf0b5{width:144pt;background-color:rgba(207, 207, 207, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-004cf0bc{width:216pt;background-color:rgba(207, 207, 207, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-0054a654'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-004cf0bc"><p class="cl-004cbcbe"><span class="cl-004ca95e">Taxonomic</span></p></td><td class="cl-004cf0b5"><p class="cl-004cbcbe"><span class="cl-004ca95e">Common</span></p></td><td class="cl-004cf0b5"><p class="cl-004cbcbe"><span class="cl-004ca95e">Abbreviated</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Gambusia holbrooki</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Mosquito Fish</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">MosqFish</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Arenigobius bifrenatus</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Bridled Goby</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Goby</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Mugil cephalus</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Gray Mullet</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Mullet</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Acanthopagrus butcheri</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Black Bream</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Bream</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Limnodynastes dorsalis</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Western Banjo Frog</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">BnjoFrog</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Pseudophryne guentheri</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Gunther's Toadlet</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">GToadlet</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Anas platyrhynchos</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Mallard Duck</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">MlrdDuck</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Spilopelia chinensis</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Spotted Turtle Dove</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">SpotDove</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Porphyrio porphyrio</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Purple Swamphen</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">SwampHen</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Porzana tabuensis</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Spotted Crake</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Crake</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Egretta novaehollandiae</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">White Faced Heron</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">WFHeron</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Trichoglossus rubritorquis</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Rainbow Lorikeet</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Lorikeet</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Bos taurus</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Cattle</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Cattle</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Ovis sp </span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Sheep</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Sheep</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Mus musculus</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Mouse</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Mouse</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Rattus sp </span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Rat</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Rat</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Blackfordia polytentaculata</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">HydroidB</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">HydroidB</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Obelia bidentata</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">HydroidO</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">HydroidO</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Phyllorhiza punctata</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Brown Jellyfish</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">BwnJelly</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0b4"><p class="cl-004cbcbe"><span class="cl-004ca968">Aurelia sp </span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">Moon Jellyfish</span></p></td><td class="cl-004cf0b3"><p class="cl-004cbcbe"><span class="cl-004ca968">MoonJely</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-004cf0a8"><p class="cl-004cbcbe"><span class="cl-004ca968">Canis lupus familiaris</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Domestic Dog</span></p></td><td class="cl-004cf0b2"><p class="cl-004cbcbe"><span class="cl-004ca968">Dog</span></p></td></tr></tbody></table></div></template>
+<div class="flextable-shadow-host" id="ded624d6-e63b-4e38-bcab-1848c25cb10a"></div>
+<script>
+var dest = document.getElementById("ded624d6-e63b-4e38-bcab-1848c25cb10a");
+var template = document.getElementById("bd0666b5-302d-43cf-a0e6-e7ace23b3f40");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<hr>
+<p>We need to make a subset of our imported data which contains just the
+species presence/absence information (not sample IDs, sites, reps). We
+also overwrite the original column names with abbreviated names for
+better visualisation later.</p>
+<pre class="r"><code>allSpecies &lt;- eDNA2022[,4:24] # not columns 1:3 which are sample IDs etc.
+colnames(allSpecies) &lt;- names_table[,3]</code></pre>
+</div>
+<div id="difference-and-similarity-measures" class="section level2">
+<h2>Difference and Similarity measures</h2>
+<p>We start by assessing how similar or different our samples are – to
+do this we need to set up a resemblance matrix. Ideally our 4 replicated
+samples are more similar to one another than any other samples – but
+with field sampling this is not always the case. To determine similarity
+we need to use a similarity measure.</p>
+<div id="similarity-measures" class="section level3">
+<h3>Similarity Measures:</h3>
+<p>A similarity measure is conventionally defined to take values between
+0 and 100% (or 0 and 1) with the ends of the range representing the
+extreme possibilities:</p>
+<ul>
+<li>Similarity = 100% (<em>or 1</em>) if two samples are totally
+similar</li>
+<li>Similarity = 0 if two samples are totally dissimilar</li>
+</ul>
+<p>What constitutes total similarity, and particularly total
+dissimilarity, of two samples depends on the specific criteria that are
+adopted. For example most biologists would feel that similarity should
+equal zero when two samples have no species in common, and similarity
+should equal 100% if two samples have identical entries. Similarities
+are calculated between every pair of samples creating a similarity
+matrix. There are a number of similarity measures (ways to calculate
+similarity) which can be used to create this matrix.</p>
+<p><strong>Bray Curtis</strong> and <strong>Jaccard</strong> are two
+different similarity measures we can use -– both are commonly used in
+ecology and have desirable properties -– similarity is calculated based
+on the taxa that samples have in common. Similarity takes a value of 0
+if two samples have no species in common and joint absences have no
+effect (<em>i.e</em>. a taxon jointly absent in two samples does not
+contribute to its similarity). The difference between them is that Bray
+Curtis will use abundance information (where it is present) in assessing
+similarity, whereas Jaccard converts abundances to binary (<em>i.e</em>.
+0s and 1s, with 1 representing presence and 0 meaning absence) to assess
+similarity. In our case it does not matter much which we use, since we
+have already converted to binary – so let’s proceed with Jaccard.</p>
+<p><strong>Ecological Question – If two samples have no taxa present
+each does this make them more similar to one another?</strong></p>
+<p>To assess similarity in the <span
+style="font-family: monospace; background-color: #e8e8e8;">vegan</span>
+<strong>R</strong> package carry out the following steps. The output
+shows the first few rows and columns of the dissimilarity matrix; each
+number represents the Jaccard distance between samples based on the
+presence or absence of species.</p>
+<pre class="r"><code>AF_diss_all &lt;- vegdist(allSpecies, 
+                           distance = &quot;jaccard&quot;) # default is distance = &quot;bray&quot;
+
+# just look at the top corner of the dissimilarity matrix:
+txt0 &lt;- capture.output(print(AF_diss_all, digits=3)); txt0[1:10]; rm(txt0)</code></pre>
+<pre><code>##  [1] &quot;        1      2      3      4      5      6      7      8      9     10     11&quot;
+##  [2] &quot;2  0.0769                                                                      &quot;
+##  [3] &quot;3  0.2727 0.1667                                                               &quot;
+##  [4] &quot;4  0.0769 0.0000 0.1667                                                        &quot;
+##  [5] &quot;5  0.3333 0.3846 0.6364 0.3846                                                 &quot;
+##  [6] &quot;6  0.3333 0.3846 0.6364 0.3846 0.0000                                          &quot;
+##  [7] &quot;7  0.3333 0.3846 0.6364 0.3846 0.0000 0.0000                                   &quot;
+##  [8] &quot;8  0.2727 0.3333 0.6000 0.3333 0.0909 0.0909 0.0909                            &quot;
+##  [9] &quot;9  0.8000 0.6364 0.5556 0.6364 0.6000 0.6000 0.6000 0.7778                     &quot;
+## [10] &quot;10 0.6000 0.6364 0.5556 0.6364 0.6000 0.6000 0.6000 0.7778 0.2500              &quot;</code></pre>
+</div>
+</div>
+</div>
+<div id="ordinations" class="section level1">
+<h1>Ordinations</h1>
+<p>Next we will construct our ordination – a procedure to visualise the
+similarity matrix by simplifying (scaling) it into fewer dimensions than
+our original data. This reduction of dimensions is useful as the
+original data will have as many dimensions as there are species, which
+is impossible to visualise! There are two different types of ordination
+that we will use: <strong>Multi-Dimensional-Scaling</strong> (nmMDS) and
+<strong>Principal Coordinates Analysis</strong> (PCO). If you have
+previously used PCA -– Principal Component Analysis – you may be
+familiar with ordination methods. PCA is useful for environmental
+datasets -– these are represented by a similarity matrix derived via use
+of Euclidean Distance as a measure of similarity. PCA is more suited to
+environmental variables because of the type of data – there are no large
+blocks of zeros (usually) and it is no longer necessary to select a
+similarity measure that ignores joint absences. When looking at
+ordination plots in general you should note that sample points that are
+spatially located together share common characteristics and sample
+points that are distantly located from one another share less
+characteristics. This holds whether we are working with environmental
+variables (pH, EC, moisture content, heavy metals <em>etc</em>.) or
+species abundances.</p>
+<p>The main difference between MDS and PCO relates to the underlying use
+of the resemblance matrix.</p>
+<p><strong>MDS</strong> takes the similarity measures calculated by
+Jaccard or Bray Curtis and ranks them in order. Thus pairs are samples
+are ranked according to highest to lowest similarity and are thus
+plotted in multidimensional space. Since it uses the rank and not the
+actual values, it’s commonly called “non-[para]metric” multi-dimensional
+scaling, or <strong>nmMDS</strong>.</p>
+<p><strong>PCO</strong> takes the actual values of the underlying
+measure of similarity and plots pairs of samples in multi-dimensional
+space. It will then look for the direction (vector) of greatest variance
+in the multi-dimensional “cloud” of points, which becomes the first PCO
+dimension. Successive dimensions explain the most possible remaining
+variance, until all variance is accounted for. So, many PCO dimensions
+are possible, but usually only the first 2 or 3 are useful for
+visualizing our data.</p>
+<p>For both types of ordinations the software attempts to preserve the
+similarity of each pair of samples –- while this is feasible in
+multidimensional space, in order for us to view the ordination we see
+this in 2 or 3 dimensions -– thus the software attempts to preserve as
+much as is feasible of the sample pair similarity as calculated –- but
+in reality we need to consider how much the 2- dimensional view is a
+true representation of the data set. In nmMDS we use the <em>stress</em>
+value to evaluate this, in PCO we can plot multiple axes, <em>i.e</em>.
+axis 1 <em>vs</em>. axis 2, axis 2 <em>vs</em>. axis 3 and so on. The
+amount of variance explained in each PCO dimension is called the
+<em>eigenvalue</em>, and the output will include these values; the
+greater the eigenvalue, the more useful a PCO dimension is. In practice,
+much of the variability is often explained in the first two axes
+(<em>i.e</em>. 2 dimensions) and we will limit our analysis to these
+axes for this dataset.</p>
+<div id="non-metric-multidimensional-scaling-nmmds"
+class="section level2">
+<h2>Non-metric multidimensional scaling (nmMDS)</h2>
+<p>In vegan this is done using the <span
+style="font-family: monospace; background-color: #e8e8e8;">metaMDS()</span>
+function. We need to specify an input matrix of just the species data
+(<em>e.g</em>. <span style="font-family: monospace;">allSpecies</span>
+which we made earlier). The default is to find 2 dimensions (<span
+style="font-family: monospace;">k</span>) using a Bray-Curtis
+dissimilarity matrix, but we can set these options to different values
+using <span style="font-family: monospace; background-color: #e8e8e8;">k
+=</span> and <span
+style="font-family: monospace; background-color: #e8e8e8;">distance
+=</span> options. The dissimilarity matrix is calculated within the
+<span
+style="font-family: monospace; background-color: #e8e8e8;">metaMDS()</span>
+function, so for consistency we set <span
+style="font-family: monospace; background-color: #e8e8e8;">distance =
+“jaccard”</span>.</p>
+<pre class="r"><code># default with 2 dimensions
+AF_nmds_all &lt;- metaMDS(allSpecies, distance = &quot;jaccard&quot;)
+# 3 dimensions for comparison
+AF_nmds_all3 &lt;- metaMDS(allSpecies, k=3, distance = &quot;jaccard&quot;)</code></pre>
+<pre class="r"><code># show output for 2 nmMDS dimensions
+AF_nmds_all</code></pre>
+<pre><code>## 
+## Call:
+## metaMDS(comm = allSpecies, distance = &quot;jaccard&quot;) 
+## 
+## global Multidimensional Scaling using monoMDS
+## 
+## Data:     allSpecies 
+## Distance: jaccard 
+## 
+## Dimensions: 2 
+## Stress:     0.1554552 
+## Stress type 1, weak ties
+## Two convergent solutions found after 20 tries
+## Scaling: centring, PC rotation, halfchange scaling 
+## Species: expanded scores based on &#39;allSpecies&#39;</code></pre>
+<p>The 2D stress value is <span class="math inline">\(\approx\)</span>
+0.16. This can be interpreted as follows:</p>
+<p><img src="playing-with-vegan_files/figure-html/unnamed-chunk-3-1.png" width="50%" style="display: block; margin: auto;" /></p>
+<p>The stress value is relatively high as we are dealing with a large
+number of samples with lots of 1s and 0s in a 2 dimensional space –
+resulting in a challenging similarity environment.</p>
+<p><span class="math inline">\(\Rightarrow\)</span> Check the stress
+value of the 3-D ordination – is it lower? Remember that we made this
+object in the code block above:</p>
+<pre class="r"><code>AF_nmds_all3</code></pre>
+<p>The following plot mimics the nmmds plot in Deirdre’s handout (note
+that the sign of dimension MDS2 is reversed)</p>
+<pre class="r"><code>palette(c(&quot;black&quot;,&quot;grey60&quot;,&quot;grey42&quot;,
+          rainbow(4,v=0.75,end=0.25),rainbow(4,v=0.75,start=0.45,end=0.8)))
+plot(AF_nmds_all$points, pch=c(rep(21:25, 2),21)[eDNA2022$Site], 
+     xlim = c(-1.6,2.2), ylim = c(1.2,-1.2), 
+     bg=seq(1,11)[eDNA2022$Site], 
+     cex = 1.4, main = &quot;All species&quot;, col.main = &quot;steelblue&quot;)
+text(AF_nmds_all$points, labels=eDNA2022$SiteID, cex=0.9, pos = 4, 
+     col=c(&quot;black&quot;,&quot;grey40&quot;,&quot;grey70&quot;,
+           rainbow(4,v=0.75,end=0.25),
+           rainbow(4,v=0.75,start=0.45,end=0.8))[eDNA2022$Site])
+text(AF_nmds_all, display = &quot;species&quot;, col = &quot;#80008080&quot;, font=3, cex = 1.1)
+legend(&quot;bottomright&quot;, inset = 0.01, box.col = 3, ncol = 4, title = &quot;Site&quot;, 
+       legend = seq(1,11), pch=c(rep(21:25, 2),21), 
+       pt.bg = seq(1,11), pt.cex = 1.4, cex = 1.2)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/plot%20nmds%20all%20Jaccard%202D-1.png" width="70%" /></p>
+<p>You can play around with the code to make additional changes – you
+won’t break it by trying so play around as much as you like. You will
+notice that there are only 2 points for Site 2 – this is because the
+points are overlaid on top of one another – as we are picking up only a
+few taxa some of the samples are very similar to one another. However we
+can generally see that there are sample groupings and that likely
+location has an effect (i.e. samples that are from the same location are
+closer together). We will test this statistically a little later.</p>
+</div>
+<div id="principal-coordinates-analysis" class="section level2">
+<h2>Principal Coordinates Analysis</h2>
+<p>In the ‘vegan’ package we use Weighted classical multidimensional
+scaling, also known as <em>Weighted Principal Coordinates Analysis</em>.
+This is implemented using the function <span
+style="font-family: monospace; background-color: #e8e8e8;">wcmdscale()</span>.</p>
+<pre class="r"><code>AF_pco_all &lt;- wcmdscale(vegdist(allSpecies), eig=TRUE)
+AF_pco_all</code></pre>
+<pre><code>## Call: wcmdscale(d = vegdist(allSpecies), eig = TRUE)
+## 
+##           Inertia Rank
+## Total       8.169     
+## Real       10.272   15
+## Imaginary  -2.103   21
+## 
+## Results have 44 points, 15 axes
+## 
+## Eigenvalues:
+##  [1]  3.377  2.101  1.537  1.297  0.613  0.434  0.342  0.214  0.158  0.100
+## [11]  0.039  0.032  0.014  0.010  0.004 -0.006 -0.007 -0.009 -0.016 -0.021
+## [21] -0.027 -0.035 -0.046 -0.052 -0.059 -0.074 -0.089 -0.094 -0.115 -0.134
+## [31] -0.143 -0.163 -0.190 -0.212 -0.242 -0.371
+## 
+## Weights: Constant</code></pre>
+<pre class="r"><code>plot(AF_pco_all)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/basic%20pco%20plot-1.png" width="480" /></p>
+<p>This is a basic PCO plot based on all species, showing the locations
+of individual samples by row number.</p>
+<p>We can make more informative plots by using the information stored in
+the output object (<span
+style="font-family: monospace; background-color: #e8e8e8;">AF_pco_all</span>).</p>
+<pre class="r"><code>palette(c(&quot;black&quot;,&quot;grey60&quot;,&quot;grey42&quot;,
+          rainbow(4,v=0.75,end=0.25),rainbow(4,v=0.75,start=0.45,end=0.8)))
+par(mfrow = c(1,2), mar = c(4,4,1,1), mgp = c(1.7,0.3,0), tcl = 0.25, 
+    font.lab = 2)
+plot(AF_pco_all$points[,c(1,2)], xlim = c(0.4,-0.6), ylim = c(0.4,-0.6), 
+     pch=3, cex = 0.5, col = &quot;grey&quot;)
+text(AF_pco_all$points[,c(1,2)],labels = eDNA2022$SiteID,
+     col=seq(1,11)[eDNA2022$Site])
+mtext(&quot;first and second dimensions&quot;)
+plot(AF_pco_all$points[,c(1,3)], xlim = c(0.4,-0.6), ylim = c(0.4,-0.6), 
+     pch=4, cex = 0.5, col = &quot;grey&quot;)
+text(AF_pco_all$points[,c(1,3)],labels = eDNA2022$SiteID,
+     col=seq(1,11)[eDNA2022$Site])
+mtext(&quot;first and third dimensions&quot;)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/better%20pco%20plot%20using%20base%20R-1.png" width="70%" /></p>
+<pre class="r"><code>AF_pco_scores &lt;- scores(AF_pco_all)</code></pre>
+</div>
+</div>
+<div id="permanova" class="section level1">
+<h1>PERMANOVA</h1>
+<p>In order to test where location has a significant effect on the taxa
+at our field site we need to run an ANOVA – however as we have multiple
+species to test together we cannot run a basic ANOVA – we must run a
+multivariate permutational ANOVA or <strong>PERMANOVA</strong>.</p>
+<p>PERMANOVA shares some resemblance to ANOVA where they both measure
+the sum-of-squares within and between groups, and make use of an F test
+to compare within-group to between-group variance. However, while ANOVA
+bases the significance of the result on assumption of normality,
+PERMANOVA draws tests for significance by comparing the actual F test
+result to that gained from random permutations of the objects between
+the groups. Moreover, whilst PERMANOVA tests for similarity based on a
+chosen distance measure, ANOVA tests for similarity of the group
+averages.</p>
+<p>We could calculate a univariate measure of diversity (a Simpson or
+Shannon index, for example) and run an ANOVA on that univariate value.
+In doing so, however, we are reducing the complex dataset to a
+simplified version and losing discrete information in the process.
+Remember that ANOVA also has an underlying assumption of normality -–
+generally speaking, biological species data are not normally distributed
+and thus do not satisfy this assumption. This makes applying a
+permutational ANOVA a much better option. Before the advent of
+computational capacity a permutational ANOVA would have taken quite some
+time to run –- luckily now it only takes a matter of seconds to minutes
+depending on the complexity of the dataset.</p>
+<p>In the <span
+style="font-family: monospace; background-color: #e8e8e8;">vegan</span>
+package, the <span
+style="font-family: monospace; background-color: #e8e8e8;">adonis2()</span>
+function implements Permutational Multivariate Analysis of Variance
+Using Distance Matrices (<em>i.e</em>. PERMANOVA).</p>
+<p>We use a formula in the <span
+style="font-family: monospace; background-color: #e8e8e8;">adonis2()</span>
+function which expresses the community matrix (<em>i.e</em>. the columns
+of species presence or absence) as a function of a factor (in this case,
+<span style="font-family: monospace;">Site</span>).</p>
+<pre class="r"><code>AF_permanova_all &lt;- adonis2(eDNA2022[,4:24] ~ Site, data = eDNA2022,
+                            permutations = 9999)
+AF_permanova_all</code></pre>
+<pre><code>## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 9999
+## 
+## adonis2(formula = eDNA2022[, 4:24] ~ Site, data = eDNA2022, permutations = 9999)
+##          Df SumOfSqs      R2      F Pr(&gt;F)    
+## Site     10   7.7475 0.94839 60.644  1e-04 ***
+## Residual 33   0.4216 0.05161                  
+## Total    43   8.1691 1.00000                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>P value by permutation = <span
+style="font-family: monospace; background-color: #e8e8e8;">0.0001</span>
+indicating a significant effect of location on the community composition
+of our samples. Note that 9999 permutations were undertaken to arrive at
+this value.</p>
+<pre class="r"><code>source(&quot;FUN_pairwise_adonis2.R&quot;)
+source(&quot;FUN_plain_pairwise.R&quot;)
+AF_PWpermanova_all &lt;- pairwise.adonis2(eDNA2022[,4:24] ~ Site, data = eDNA2022)
+AF_plainPW_all &lt;- plainPW(AF_PWpermanova_all)
+colnames(AF_plainPW_all)[1] &lt;- &quot;Comparison.between.Sites&quot;
+flextable(AF_plainPW_all, cwidth = c(1.5,1)) %&gt;% align(align=&quot;center&quot;)</code></pre>
+<template id="2a5ddd18-baba-478e-9c16-6b3dee1d84cb"><style>
+.tabwid table{
+  border-spacing:0px !important;
+  border-collapse:collapse;
+  line-height:1;
+  margin-left:auto;
+  margin-right:auto;
+  border-width: 0;
+  display: table;
+  margin-top: 1.275em;
+  margin-bottom: 1.275em;
+  border-color: transparent;
+}
+.tabwid_left table{
+  margin-left:0;
+}
+.tabwid_right table{
+  margin-right:0;
+}
+.tabwid td {
+    padding: 0;
+}
+.tabwid a {
+  text-decoration: none;
+}
+.tabwid thead {
+    background-color: transparent;
+}
+.tabwid tfoot {
+    background-color: transparent;
+}
+.tabwid table tr {
+background-color: transparent;
+}
+</style><div class="tabwid"><style>.cl-021e9896{}.cl-0216b978{font-family:'Arial';font-size:9pt;font-weight:bold;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-0216b982{font-family:'Arial';font-size:9pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-0216c97c{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-0216c986{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-0216c990{margin:0;text-align:center;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-02171152{width:108pt;background-color:rgba(239, 239, 239, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-02171153{width:72pt;background-color:rgba(239, 239, 239, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-0217115c{width:72pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-02171166{width:108pt;background-color:transparent;vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-02171167{width:108pt;background-color:rgba(207, 207, 207, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-02171168{width:72pt;background-color:rgba(207, 207, 207, 1.00);vertical-align: middle;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table class='cl-021e9896'>
+<thead><tr style="overflow-wrap:break-word;"><td class="cl-02171167"><p class="cl-0216c97c"><span class="cl-0216b978">Comparison.between.Sites</span></p></td><td class="cl-02171168"><p class="cl-0216c986"><span class="cl-0216b978">P_value</span></p></td></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_2</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_3</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.021</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_4</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_5</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.035</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_6</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_7</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.034</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_8</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.034</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_9</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.022</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_10</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">1_vs_11</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.025</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_3</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_4</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_5</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.027</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_6</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.030</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_7</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.024</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_8</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.026</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_9</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.032</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_10</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">2_vs_11</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.036</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_4</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.024</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_5</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.035</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_6</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.030</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_7</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_8</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.024</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_9</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.039</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_10</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.031</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">3_vs_11</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.020</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_5</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.027</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_6</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.032</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_7</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_8</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.024</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_9</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.028</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_10</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">4_vs_11</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.038</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">5_vs_6</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.031</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">5_vs_7</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.026</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">5_vs_8</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.022</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">5_vs_9</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">5_vs_10</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">5_vs_11</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.031</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">6_vs_7</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.019</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">6_vs_8</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.030</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">6_vs_9</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.033</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">6_vs_10</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.096</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">6_vs_11</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.032</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">7_vs_8</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.024</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">7_vs_9</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.034</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">7_vs_10</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.041</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">7_vs_11</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.029</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">8_vs_9</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.037</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">8_vs_10</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.023</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">8_vs_11</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.028</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">9_vs_10</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.036</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171166"><p class="cl-0216c990"><span class="cl-0216b982">9_vs_11</span></p></td><td class="cl-0217115c"><p class="cl-0216c990"><span class="cl-0216b982">0.034</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-02171152"><p class="cl-0216c990"><span class="cl-0216b982">10_vs_11</span></p></td><td class="cl-02171153"><p class="cl-0216c990"><span class="cl-0216b982">0.032</span></p></td></tr></tbody></table></div></template>
+<div class="flextable-shadow-host" id="fe09871a-cd96-458c-8344-55a7641e6f1e"></div>
+<script>
+var dest = document.getElementById("fe09871a-cd96-458c-8344-55a7641e6f1e");
+var template = document.getElementById("2a5ddd18-baba-478e-9c16-6b3dee1d84cb");
+var caption = template.content.querySelector("caption");
+if(caption) {
+  caption.style.cssText = "display:block;text-align:center;";
+  var newcapt = document.createElement("p");
+  newcapt.appendChild(caption)
+  dest.parentNode.insertBefore(newcapt, dest.previousSibling);
+}
+var fantome = dest.attachShadow({mode: 'open'});
+var templateContent = template.content;
+fantome.appendChild(templateContent);
+</script>
+
+<p><strong>Notes</strong>:</p>
+<ul>
+<li>the pairwise Adonis2 source code is by Pedro Martinez Arbizu at <a
+href="https://github.com/pmartinezarbizu/pairwiseAdonis"
+class="uri">https://github.com/pmartinezarbizu/pairwiseAdonis</a>.</li>
+<li>The code for the <span
+style="font-family: monospace;">plainPW()</span> function is as
+follows:</li>
+</ul>
+<pre class="r"><code># function inputs output object from Pedro Martinez Arbizu&#39;s pairwise.adonis2()
+# code at https://github.com/pmartinezarbizu/pairwiseAdonis
+plainPW &lt;- function(PWobj) {
+  UL_PW_perm &lt;- unlist(PWobj) # convert list to long named vector
+  names_PW_perm &lt;- names(UL_PW_perm) # extract the names...
+  rows_pvals &lt;- grep(&quot;F)1&quot;,names_PW_perm) # find the rows we need
+  justThePW &lt;- # use the row indices to find the rown in the long vector
+    data.frame(Comparison = str_remove(names(UL_PW_perm[rows_pvals]),
+                                       fixed(&quot;.Pr(&gt;F)1&quot;)),
+               P_value = as.numeric(UL_PW_perm[rows_pvals]))
+  return(justThePW) # and the resulting data frame is the output!
+}</code></pre>
+</div>
+<div id="extras" class="section level1">
+<h1>Extras</h1>
+<div
+id="stress-plot-for-nmmds-based-on-jaccard-dissimilarities-all-species"
+class="section level3">
+<h3>Stress plot for nmMDS based on Jaccard dissimilarities, all
+species</h3>
+<pre class="r"><code>stressplot(AF_nmds_all, main=&quot;Stress plot&quot;)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/unnamed-chunk-6-1.png" width="576" /></p>
+</div>
+<div id="analysis-with-just-the-aquatic-species" class="section level2">
+<h2>Analysis with just the aquatic species</h2>
+<p>These are: <em>Gambusia holbrooki, Arenigobius bifrenatus, Mugil
+cephalus, Acanthopagrus butcheri, Limnodynastes dorsalis, Pseudophryne
+guentheri, Blackfordia polytentaculata, Obelia bidentata, Phyllorhiza
+punctata, Aurelia sp.</em></p>
+<pre class="r"><code>fish &lt;- allSpecies[,c(1:6,17:20)]
+head(fish)</code></pre>
+<pre><code>##   MosqFish Goby Mullet Bream BnjoFrog GToadlet HydroidB HydroidO BwnJelly
+## 1        1    0      0     0        1        0        0        0        0
+## 2        1    0      0     0        1        1        0        0        0
+## 3        1    0      0     0        0        1        0        0        0
+## 4        1    0      0     0        1        1        0        0        0
+## 5        1    0      0     0        1        0        0        0        0
+## 6        1    0      0     0        1        0        0        0        0
+##   MoonJely
+## 1        0
+## 2        0
+## 3        0
+## 4        0
+## 5        0
+## 6        0</code></pre>
+<div id="for-interest-look-at-the-dissimilarity-matrix"
+class="section level3">
+<h3>for interest look at the dissimilarity matrix</h3>
+<pre class="r"><code>AF_diss_aquat &lt;- vegdist(fish, 
+                           distance = &quot;bray&quot;)
+txt0 &lt;- capture.output(print(AF_diss_aquat,digits=3));txt0[1:10];rm(txt0)</code></pre>
+<pre><code>##  [1] &quot;        1      2      3      4      5      6      7      8      9     10     11&quot;
+##  [2] &quot;2  0.2000                                                                      &quot;
+##  [3] &quot;3  0.5000 0.2000                                                               &quot;
+##  [4] &quot;4  0.2000 0.0000 0.2000                                                        &quot;
+##  [5] &quot;5  0.0000 0.2000 0.5000 0.2000                                                 &quot;
+##  [6] &quot;6  0.0000 0.2000 0.5000 0.2000 0.0000                                          &quot;
+##  [7] &quot;7  0.0000 0.2000 0.5000 0.2000 0.0000 0.0000                                   &quot;
+##  [8] &quot;8  0.0000 0.2000 0.5000 0.2000 0.0000 0.0000 0.0000                            &quot;
+##  [9] &quot;9  0.5000 0.2000 0.0000 0.2000 0.5000 0.5000 0.5000 0.5000                     &quot;
+## [10] &quot;10 0.3333 0.5000 0.3333 0.5000 0.3333 0.3333 0.3333 0.3333 0.3333              &quot;</code></pre>
+<pre class="r"><code>AF_nmds_aquat &lt;- metaMDS(fish, trymax = 500, 
+                           distance = &quot;jaccard&quot;)</code></pre>
+<pre class="r"><code>AF_nmds_aquat</code></pre>
+<pre><code>## 
+## Call:
+## metaMDS(comm = fish, distance = &quot;jaccard&quot;, trymax = 500) 
+## 
+## global Multidimensional Scaling using monoMDS
+## 
+## Data:     fish 
+## Distance: jaccard 
+## 
+## Dimensions: 2 
+## Stress:     0.08664753 
+## Stress type 1, weak ties
+## Two convergent solutions found after 20 tries
+## Scaling: centring, PC rotation, halfchange scaling 
+## Species: expanded scores based on &#39;fish&#39;</code></pre>
+<pre class="r"><code>plot(AF_nmds_aquat, type=&quot;p&quot;,display = &quot;sites&quot;, cex = 1.2)
+text(AF_nmds_aquat, display = &quot;species&quot;, col = &quot;dodgerblue&quot;, cex = 0.8)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/plot%20nmds%20aquat%20Bray-1.png" width="480" /></p>
+</div>
+<div id="alternative-to-vegan-plots" class="section level3">
+<h3>alternative to vegan plots</h3>
+<pre class="r"><code>palette(c(&quot;black&quot;,&quot;grey80&quot;,&quot;grey92&quot;,
+          rainbow(4,s=0.5,end=0.25),rainbow(4,s=0.5,start=0.45,end=0.8)))
+plot(AF_nmds_aquat$points, pch=c(rep(21:25, 2),21)[eDNA2022$Site], 
+     xlim = c(-1.2,1.8), 
+     bg = seq(1,11)[eDNA2022$Site], 
+     cex = 1.4, col.main = &quot;steelblue&quot;, main = &quot;Just aquatic species&quot;)
+text(AF_nmds_aquat$points, pos = rep(c(1,2,4),4)[eDNA2022$Site], 
+     labels=eDNA2022$SiteID, cex=1, 
+     col=c(&quot;black&quot;,&quot;grey40&quot;,&quot;grey70&quot;,
+           rainbow(4,v=0.75,end=0.25),
+           rainbow(4,v=0.75,start=0.45,end=0.8))[eDNA2022$Site])
+text(AF_nmds_aquat, display = &quot;species&quot;, col = &quot;grey33&quot;, font=3, cex = 0.9)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/alt1%20to%20vegan%20nmds%20plots-1.png" width="480" /></p>
+</div>
+</div>
+<div id="detrended-correspondence-analysis---all-species"
+class="section level2">
+<h2>Detrended correspondence analysis - all species</h2>
+<pre class="r"><code>AF_dca_all &lt;- decorana(allSpecies)
+AF_dca_all</code></pre>
+<pre><code>## 
+## Call:
+## decorana(veg = allSpecies) 
+## 
+## Detrended correspondence analysis with 26 segments.
+## Rescaling of axes with 4 iterations.
+## 
+##                   DCA1   DCA2   DCA3    DCA4
+## Eigenvalues     0.5537 0.3602 0.2545 0.17011
+## Decorana values 0.5632 0.3154 0.1915 0.07493
+## Axis lengths    3.2842 2.6926 2.1577 1.75539</code></pre>
+<pre class="r"><code>plot(AF_dca_all)</code></pre>
+<p><img src="playing-with-vegan_files/figure-html/decorana%20plot-1.png" width="480" /></p>
+</div>
+<div
+id="for-comparison-if-wanted-nmmds-again-with-bray-curtis-distances"
+class="section level2">
+<h2>For comparison if wanted: nmMDS again with Bray-Curtis
+distances</h2>
+<pre class="r"><code>AF_nmds_all_B &lt;- metaMDS(allSpecies) # uses Bray by default</code></pre>
+<pre class="r"><code>AF_nmds_all_B</code></pre>
+<pre><code>## 
+## Call:
+## metaMDS(comm = allSpecies) 
+## 
+## global Multidimensional Scaling using monoMDS
+## 
+## Data:     allSpecies 
+## Distance: bray 
+## 
+## Dimensions: 2 
+## Stress:     0.1554552 
+## Stress type 1, weak ties
+## Two convergent solutions found after 20 tries
+## Scaling: centring, PC rotation, halfchange scaling 
+## Species: expanded scores based on &#39;allSpecies&#39;</code></pre>
+<p>The results should be identical to nmMDS with Jaccard, since the
+community matrix is already converted to presence-absence (binary ones
+and zeros).</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
