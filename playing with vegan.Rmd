@@ -1,35 +1,26 @@
 ---
-title: "eDNA Data Analysis"
-documentclass: article
-classoption: a4paper
+title: "eDNA Data Analysis Workshop 2023"
 output: 
   html_document: 
     fig_width: 6
     fig_height: 4.5
     fig_caption: yes
     self_contained: no
-  word_document:
-    fig_width: 6
-    fig_height: 4.5
-    fig_caption: yes
-fig_height: 50%
-fig_width: 50%
-geometry: margin=0.6in
+    theme: 
+      bootswatch: cyborg
 ---
-
-# eDNA Data Analysis Workshop 2022
 
 ## Learning Outcomes:
 
 1. Students are able to appropriately analyse data from an eDNA field sampling campaign;
-2. Students are able to interpret and understand statistical outputs from the R package [vegan]{style="font-family: monospace; background-color: #e8e8e8;"}.
+2. Students are able to interpret and understand statistical outputs from the R package [vegan]{style="font-family: monospace; background-color: #404040;"}.
 
 ```{r set up, message=FALSE, warning=FALSE, results='hide'}
 library(vegan)
 library(flextable)
 library(stringr)
 library(magrittr) # for pipe syntax
-set_flextable_defaults(theme_fun = "theme_zebra", font.size = 9)
+set_flextable_defaults(theme_fun = "theme_vader", font.size = 9)
 ```
 
 ## Import the data
@@ -37,7 +28,7 @@ set_flextable_defaults(theme_fun = "theme_zebra", font.size = 9)
 **Notes**:
 
 1. This code imports the data from a file where the **samples are rows** and the **species are columns**.
-2. We convert the column [Site]{style="font-family: monospace; background-color: #e8e8e8;"} to a *factor* (categorical information in R)
+2. We convert the column [Site]{style="font-family: monospace; background-color: #404040;"} to a *factor* (categorical information in R)
 
 ```{r}
 eDNA2022 <- read.csv(file = "eDNA2022.csv")
@@ -125,7 +116,7 @@ Jaccard.
 
 **Ecological Question – If two samples have no taxa present each does this make them more similar to one another?**
 
-To assess similarity in the [vegan]{style="font-family: monospace; background-color: #e8e8e8;"} **R** package carry out the following steps. The
+To assess similarity in the [vegan]{style="font-family: monospace; background-color: #404040;"} **R** package carry out the following steps. The
 output shows the first few rows and columns of the dissimilarity matrix; each
 number represents the Jaccard distance between samples based on the presence or
 absence of species.
@@ -192,16 +183,16 @@ dataset.
 ## Non-metric multidimensional scaling (nmMDS)
 
 In vegan this is done using the [metaMDS()]{style="font-family: monospace;
-background-color: #e8e8e8;"} function. We need to specify an input matrix of
+background-color: #404040;"} function. We need to specify an input matrix of
 just the species data (*e.g*. [allSpecies]{style="font-family: monospace;"}
 which we made earlier). The default is to find 2 dimensions
 ([k]{style="font-family: monospace;"}) using a Bray-Curtis dissimilarity matrix,
 but we can set these options to different values using [k =]{style="font-family:
-monospace; background-color: #e8e8e8;"} and [distance =]{style="font-family:
-monospace; background-color: #e8e8e8;"} options. The dissimilarity matrix is
+monospace; background-color: #404040;"} and [distance =]{style="font-family:
+monospace; background-color: #404040;"} options. The dissimilarity matrix is
 calculated within the [metaMDS()]{style="font-family: monospace;
-background-color: #e8e8e8;"} function, so for consistency we set [distance =
-"jaccard"]{style="font-family: monospace; background-color: #e8e8e8;"}.
+background-color: #404040;"} function, so for consistency we set [distance =
+"jaccard"]{style="font-family: monospace; background-color: #404040;"}.
 
 ```{r run nmds all jaccard, results='hide'}
 # default with 2 dimensions
@@ -274,7 +265,7 @@ little later.
 
 In the 'vegan' package we use Weighted classical multidimensional scaling, also
 known as *Weighted Principal Coordinates Analysis*. This is implemented using 
-the function [wcmdscale()]{style="font-family: monospace; background-color: #e8e8e8;"}.
+the function [wcmdscale()]{style="font-family: monospace; background-color: #404040;"}.
 
 ```{r}
 AF_pco_all <- wcmdscale(vegdist(allSpecies), eig=TRUE)
@@ -289,7 +280,7 @@ individual samples by row number.
 
 We can make more informative plots by using the information stored in the
 output object 
-([AF_pco_all]{style="font-family: monospace; background-color: #e8e8e8;"}).
+([AF_pco_all]{style="font-family: monospace; background-color: #404040;"}).
 
 ```{r better pco plot using base R, fig.width=8, fig.height=4, out.width="70%"}
 palette(c("black","grey60","grey42",
@@ -338,13 +329,13 @@ computational capacity a permutational ANOVA would have taken quite some time to
 run –- luckily now it only takes a matter of seconds to minutes depending on the
 complexity of the dataset.
 
-In the [vegan]{style="font-family: monospace; background-color: #e8e8e8;"}
+In the [vegan]{style="font-family: monospace; background-color: #404040;"}
 package, 
-the [adonis2()]{style="font-family: monospace; background-color: #e8e8e8;"}
+the [adonis2()]{style="font-family: monospace; background-color: #404040;"}
 function implements Permutational Multivariate Analysis of Variance Using
 Distance Matrices (*i.e*. PERMANOVA).
 
-We use a formula in the [adonis2()]{style="font-family: monospace; background-color: #e8e8e8;"} function which expresses the community matrix 
+We use a formula in the [adonis2()]{style="font-family: monospace; background-color: #404040;"} function which expresses the community matrix 
 (*i.e*. the columns of species presence or absence) as a function of a factor 
 (in this case, [Site]{style="font-family: monospace;"}).
 
@@ -355,16 +346,16 @@ AF_permanova_all
 ```
 
 P value by permutation = [0.0001]{style="font-family: monospace;
-background-color: #e8e8e8;"} indicating a significant effect of location on the
+background-color: #404040;"} indicating a significant effect of location on the
 community composition of our samples. Note that 9999 permutations were
 undertaken to arrive at this value.
 
-The output from the [pairwise.adonis2()]{style="font-family: monospace; background-color: #e8e8e8;"} function is quite lengthy (to see it, run 
-[print(AF_PWpermanova_all)]{style="font-family: monospace; background-color: #e8e8e8;"}). We can tidy it up for clarity with a custom function ([plainPW()]{style="font-family: monospace; background-color: #f8c8f8;"} -- see below).
+The output from the [pairwise.adonis2()]{style="font-family: monospace; background-color: #404040;"} function is quite lengthy (to see it, run 
+[print(AF_PWpermanova_all)]{style="font-family: monospace; background-color: #404040;"}). We can tidy it up for clarity with a custom function ([plainPW()]{style="font-family: monospace; background-color: #683838;"} -- see below).
 
 ```{r pairwise Permanova, paged.print=FALSE}
-source("FUN_pairwise_adonis2.R")
-source("FUN_plain_pairwise.R")
+source("https://github.com/Ratey-AtUWA/eDNA/raw/master/FUN_pairwise_adonis2.R")
+source("https://github.com/Ratey-AtUWA/eDNA/raw/master/FUN_plain_pairwise.R")
 AF_PWpermanova_all <- pairwise.adonis2(eDNA2022[,4:24] ~ Site, data = eDNA2022)
 AF_plainPW_all <- plainPW(AF_PWpermanova_all)
 colnames(AF_plainPW_all)[1] <- "Comparison.between.Sites"
@@ -373,7 +364,7 @@ flextable(AF_plainPW_all, cwidth = c(1.5,1)) %>% align(align="center")
 
 **Notes**: 
 
-- the pairwise Adonis2 source code is by Pedro Martinez Arbizu at https://github.com/pmartinezarbizu/pairwiseAdonis.
+- the pairwise Adonis2 source code is by Pedro Martinez Arbizu at [github.com/pmartinezarbizu/pairwiseAdonis](https://raw.githubusercontent.com/pmartinezarbizu/pairwiseAdonis/master/pairwiseAdonis/R/pairwise.adonis2.R).
 - The code for the [plainPW()]{style="font-family: monospace;"} function is as follows:
 
 ```{r plainPW function code, eval=FALSE}
@@ -390,6 +381,9 @@ plainPW <- function(PWobj) {
   return(justThePW) # and the resulting data frame is the output!
 }
 ```
+
+You can also get the [plainPW()]{style="font-family: monospace;"} function code
+at [github.com/Ratey-AtUWA/.../FUN_plain_pairwise.R](https://github.com/Ratey-AtUWA/eDNA/raw/master/FUN_plain_pairwise.R).
 
 # Extras
 
@@ -473,3 +467,7 @@ AF_nmds_all_B
 
 The results should be identical to nmMDS with Jaccard, since the community
 matrix is already converted to presence-absence (binary ones and zeros).
+
+<hr>
+
+<span style="font-size:9pt">Created with [rmarkdown]{style="font-family: monospace; background-color: #404040;"} in RStudio using the cyborg theme from Bootswatch via the [bslib]{style="font-family: monospace; background-color: #404040;"} package.</span>
